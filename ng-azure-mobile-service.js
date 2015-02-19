@@ -10,7 +10,7 @@ angular.module('azure-mobile-service.module', [])
     var MobileServiceClient = WindowsAzure.MobileServiceClient;
     var client = new MobileServiceClient(API_URL, API_KEY);
 
-    
+
     var getCachedUser = function(){
         if (sessionStorage.loggedInUser){
             client.currentUser = JSON.parse(sessionStorage.loggedInUser);
@@ -20,7 +20,7 @@ angular.module('azure-mobile-service.module', [])
     getCachedUser();
 
     var getTable = function(tableName, withFilterFn){
-        
+
         if (typeof withFilterFn === 'function')
             return client.withFilter(withFilterFn).getTable(tableName);
 
@@ -62,7 +62,7 @@ angular.module('azure-mobile-service.module', [])
             The query method will create and return an azure query.
 
             @param string tableName                      REQUIRED The name of the table to query
-            @param object obj 
+            @param object obj
                 @param obj or function criteria          The search object or a function to filter
                                                          If function then it must be an OData predicate.
                 @param array params                      Array of parameters to pass the criteria function
@@ -71,12 +71,12 @@ angular.module('azure-mobile-service.module', [])
                 @param int skip                          Number of reuslts to skip over
                 @param array orderBy                     Array of objects
                     @param string column                 Column name to sort by
-                    @param string direction              Direction to sort asc || desc         
+                    @param string direction              Direction to sort asc || desc
             @param function withFilterFn                 OPTIONAL A function that can read and write arbitrary properties or add additional headers to the request
             @return promise               Returns a WindowsAzure promise
         */
         query: function(tableName, obj, withFilterFn){
-            
+
             var data = null;
 
             if (isNullOrUndefined(tableName)){
@@ -85,18 +85,18 @@ angular.module('azure-mobile-service.module', [])
             }
 
             if (angular.isDefined(obj) && angular.isObject(obj)){
-                
+
                 if (isUndefinedOrNotAnObjectOrFunction(obj.criteria)){
                     obj.criteria = {};
                 }
-                
+
                 data = getTable(tableName, withFilterFn).where(obj.criteria, obj.params);
 
                 //Number of results to return
                 if (isNotNullOrUndefined(obj.take) && angular.isNumber(obj.take)){
                     data = data.take(obj.take);
                 }
-                
+
                 //number of results to skip
                 if (isNotNullOrUndefined(obj.skip) && angular.isNumber(obj.take)){
                     data = data.skip(obj.skip);
@@ -124,7 +124,7 @@ angular.module('azure-mobile-service.module', [])
                 if (angular.isDefined(obj.columns) && angular.isArray(obj.columns)){
                     data = data.select(obj.columns.join());
                 }
-            
+
             }else {
                 //No criteria specified - get everything - Note azure limits the count of returned items see docs.
                 data = getTable(tableName, withFilterFn).where({});
@@ -153,10 +153,10 @@ angular.module('azure-mobile-service.module', [])
             }
 
             return wrapAzurePromiseWithAngularPromise(getTable(tableName, withFilterFn).lookup(id));
-        }, 
+        },
 
         /*
-          Alias to .query(tableName, null, withFilterFn) 
+          Alias to .query(tableName, null, withFilterFn)
           Returns all results
         */
         getAll: function(tableName, withFilterFn){
@@ -210,7 +210,7 @@ angular.module('azure-mobile-service.module', [])
         },
 
         /*
-          Delete row(s) from Azure 
+          Delete row(s) from Azure
 
           @param string tableName       REQUIRED The name of the table to query
           @param object obj             REQUIRED A JSON object of data to query for deletion from the database
@@ -235,7 +235,7 @@ angular.module('azure-mobile-service.module', [])
         /*
           Logs a user into the oauthProvider service using Windows Azure
           Stores the data in sessionStorage for future queries
-        
+
           @param  string oauthProvider  REQUIRED pass in an oauth provider
           @return promise               Returns a WindowsAzure promise
         */
@@ -247,14 +247,14 @@ angular.module('azure-mobile-service.module', [])
             }
 
             var promise = client.login(oauthProvider).then(function(){
-                //cache login 
+                //cache login
                 sessionStorage.loggedInUser = JSON.stringify(client.currentUser);
             });
-            
+
             return wrapAzurePromiseWithAngularPromise(promise);
         },
         /*
-          Logs a user out 
+          Logs a user out
         */
 
         logout: function(){
@@ -262,18 +262,18 @@ angular.module('azure-mobile-service.module', [])
             sessionStorage.loggedInUser = null;
             client.logout();
         },
-        
+
         isLoggedIn: function(){
             return isNotNullOrUndefined(client.currentUser)  && isNotNullOrUndefined(sessionStorage.loggedInUser);
-        }, 
+        },
 
         /*
             @param string name          the custom api name
-            @param object options    
+            @param object options
                 @param string method        required get, post, put, delete
                 @param object body          key/value to send in the request body
                 @param object headers       key value  to send in the headers
-                @param object parameters    key/value to send as parameters          
+                @param object parameters    key/value to send as parameters
 
         */
 
@@ -298,11 +298,11 @@ angular.module('azure-mobile-service.module', [])
                 console.error('Azureservice.invokeApi Invalid method type');
                 return null;
             }
-            
+
 
             client
                 .invokeApi(name, options)
-                .done(function(results){   
+                .done(function(results){
                     deferred.resolve(results.result);
                 },
                 function(err){
